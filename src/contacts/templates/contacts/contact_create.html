@@ -1,0 +1,17 @@
+{% block content %}
+
+<form action="{% url 'contacts:contact-create' %}" method="post">
+    {% csrf_token %}
+    {{ form.as_p }} <br>
+    <input type="submit" value="save">
+
+    <!-- <button>save</button> -->
+</form>
+
+<button><a href="{% url 'contacts:contact-list' %}">Back to list</a></button>
+
+<!-- {% endblock %}
+
+{{ obj.id }} -->
+
+<!-- {{ obj.id }} -->

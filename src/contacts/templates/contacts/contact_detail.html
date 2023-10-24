@@ -1,0 +1,17 @@
+{% block content %}
+
+<h1>{{ object.name }}</h1>
+<p>{% if object.message != None %} {{ object.message }}{% else %} oh here we again. {% endif %} </p>
+<p>{{ object.number }}</p>
+
+<button><a href="{% url 'contacts:contact-update' object.id %}">Edit</a></button><br><br>
+<button><a href="{% url 'contacts:contact-delete' object.id %}">Delete</a></button><br><br>
+<button><a href="{% url 'contacts:contact-list' %}">Home</a></button>
+
+<!-- <input type="submit" value="Edit">
+<input type="button" value="Delete">
+<button>delete</button> -->
+<!-- <input type="submit" value="detail" name="detail" id="obj.id">  -->
+
+
+{% endblock %}

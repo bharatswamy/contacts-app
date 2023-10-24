@@ -1,0 +1,27 @@
+{% block content %}
+<h1>contacts list </h1>
+
+<input type="text" id="search_input" placeholder="Type to search">
+<button type="submit" onclick="search_contact()">Search</button>
+
+<!-- ye contacts context se aaya hai jis par for loop chla hai -->
+{% for instance in object_list %}
+<!-- class base me context nhi lete to ye object_list lete hai. -->
+
+<p> {{forloop.counter}} - <a href="{{ instance.get_absolute_url }}"> {{ instance.name }} </a></p>
+
+{% endfor %}
+
+<button><a href="{% url 'contacts:contact-create' %}">Create Contact</a></button>
+<!-- <button><a href="{% url 'contacts:contact-list' %}">Back to list</a></button> -->
+
+<script type="text/javascript">
+    function search_contact() {
+        var start_url = "{% url 'contacts:contact-list' %}"
+        var search_input = document.getElementById('search_input').value;
+        var final_url = start_url + "?search=" + search_input;
+        window.location = final_url;
+    } 
+</script>
+
+{% endblock %}

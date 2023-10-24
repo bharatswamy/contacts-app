@@ -1,0 +1,15 @@
+{% block content %}
+
+<form action="{% url 'contacts:contact-update' id %}" method="post">
+    {% csrf_token %}
+    {{ form.as_p }} <br>
+    <input type="submit" value="save">
+
+</form>
+<button><a href="{% url 'contacts:contact-list' %}">Don't Save</a></button>
+
+{% endblock %}
+
+<!-- {{ obj.id }} -->
+
+<!-- {{ obj.id }} -->
