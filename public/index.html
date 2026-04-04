@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact Canvas</title>
+  <meta
+    name="description"
+    content="A polished contact book that runs entirely in the browser and deploys cleanly to Cloudflare."
+  >
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="site-shell">
+    <div class="backdrop backdrop-one"></div>
+    <div class="backdrop backdrop-two"></div>
+
+    <header class="topbar">
+      <a class="brand" href="/">
+        <span class="brand-mark">CC</span>
+        <span>
+          <strong>Contact Canvas</strong>
+          <small>Cloudflare-ready personal directory</small>
+        </span>
+      </a>
+      <div class="topbar-badge">Static app • Browser storage</div>
+    </header>
+
+    <main class="page-frame">
+      <section class="hero-panel">
+        <div>
+          <span class="eyebrow">Cloudflare Edition</span>
+          <h1>Your contact book, now deployable as a static app.</h1>
+          <p>
+            This version runs fully in the browser, saves contacts in local storage,
+            and keeps the same warm visual style without needing a Django server.
+          </p>
+          <div class="hero-actions">
+            <a class="button-link" href="#contact-form">Add Contact</a>
+            <button class="button-ghost" id="seed-demo" type="button">Load Demo Data</button>
+          </div>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-tile">
+            <strong id="total-count">0</strong>
+            <span>Saved contacts</span>
+          </div>
+          <div class="stat-tile">
+            <strong id="search-count">0</strong>
+            <span>Visible after search</span>
+          </div>
+          <div class="stat-tile">
+            <strong>Local</strong>
+            <span>Stored on this device only</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="split-layout app-layout">
+        <article class="split-card">
+          <div class="section-head">
+            <div>
+              <span class="eyebrow">Directory</span>
+              <h2>Search, browse, and manage people quickly.</h2>
+            </div>
+          </div>
+
+          <form class="search-panel" id="search-form">
+            <input
+              class="app-input"
+              id="search-input"
+              type="text"
+              placeholder="Search by name or number"
+              autocomplete="off"
+            >
+            <button class="button" type="submit">Search</button>
+          </form>
+
+          <div class="toolbar">
+            <button class="button-ghost" id="clear-search" type="button">Clear Search</button>
+            <button class="button-ghost" id="clear-all" type="button">Delete All</button>
+          </div>
+
+          <section class="contacts-grid" id="contacts-grid"></section>
+
+          <section class="empty-card is-hidden" id="empty-state">
+            <span class="eyebrow">Nothing Here Yet</span>
+            <h2>No contacts to show.</h2>
+            <p>Add your first contact or load demo data to see the interface in action.</p>
+          </section>
+        </article>
+
+        <aside class="detail-side">
+          <section class="form-card" id="contact-form">
+            <div class="section-head">
+              <div>
+                <span class="eyebrow" id="form-eyebrow">New Entry</span>
+                <h2 id="form-title">Create Contact</h2>
+              </div>
+            </div>
+
+            <form class="form-shell" id="editor-form">
+              <div class="form-grid">
+                <div class="field">
+                  <label for="name">Name</label>
+                  <input class="app-input" id="name" name="name" type="text" placeholder="Contact name" required>
+                </div>
+                <div class="field">
+                  <label for="number">Phone Number</label>
+                  <input class="app-input" id="number" name="number" type="text" placeholder="Phone number" required>
+                </div>
+                <div class="field">
+                  <label for="message">Notes</label>
+                  <textarea class="app-textarea" id="message" name="message" rows="5" placeholder="A few notes about this person"></textarea>
+                </div>
+              </div>
+              <p class="field-message" id="form-message"></p>
+              <div class="button-row">
+                <button class="button" id="submit-button" type="submit">Save Contact</button>
+                <button class="button-ghost" id="cancel-edit" type="button">Reset</button>
+              </div>
+            </form>
+          </section>
+
+          <section class="detail-card" id="preview-card">
+            <span class="eyebrow">Preview</span>
+            <div class="detail-hero">
+              <div class="avatar" id="preview-avatar">C</div>
+              <div>
+                <h2 id="preview-name">Contact Canvas</h2>
+                <div class="contact-meta" id="preview-number">Select a contact to inspect it here.</div>
+              </div>
+            </div>
+            <div class="detail-note" id="preview-message">
+              Contact notes will appear here. This panel helps the static app still feel like a profile view.
+            </div>
+          </section>
+
+          <section class="section-card">
+            <span class="eyebrow">Deployment Note</span>
+            <p class="section-copy">
+              This Cloudflare version is static. Contacts are saved in your browser and are not shared across devices.
+            </p>
+          </section>
+        </aside>
+      </section>
+    </main>
+  </div>
+
+  <template id="contact-card-template">
+    <article class="contact-card">
+      <div class="contact-head">
+        <div class="avatar contact-avatar"></div>
+        <div>
+          <div class="contact-meta contact-order"></div>
+          <h3 class="contact-name"></h3>
+        </div>
+      </div>
+      <div class="meta-row">
+        <span class="meta-pill contact-number"></span>
+      </div>
+      <p class="contact-message"></p>
+      <div class="button-row">
+        <button class="button-link contact-view" type="button">Preview</button>
+        <button class="button-ghost contact-edit" type="button">Edit</button>
+        <button class="button-danger contact-delete" type="button">Delete</button>
+      </div>
+    </article>
+  </template>
+
+  <script src="./app.js"></script>
+</body>
+</html>
+
