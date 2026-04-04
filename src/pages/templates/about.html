@@ -1,7 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}About | Contact Canvas{% endblock %}
+
 {% block content %}
-
-<h1>hello from about view</h1>
-<p>here we see the about page</p>
-
-
+<section class="section-card">
+    <span class="eyebrow">About This Build</span>
+    <h2>Simple CRUD, but with a stronger visual point of view.</h2>
+    <p class="section-copy">
+        The app keeps the same Django structure and contact workflow, but the interface now uses
+        a warmer palette, larger type, stronger cards, and cleaner forms so it feels intentionally designed.
+    </p>
+    <div class="feature-grid">
+        <article>
+            <h3>Warm Palette</h3>
+            <p class="muted">Cream backgrounds, terracotta accents, and sage details replace the plain default look.</p>
+        </article>
+        <article>
+            <h3>Reusable Layout</h3>
+            <p class="muted">A shared base template keeps navigation and styling consistent everywhere.</p>
+        </article>
+        <article>
+            <h3>Better UX</h3>
+            <p class="muted">Cards, actions, and form fields are clearer and easier to scan.</p>
+        </article>
+    </div>
+</section>
 {% endblock %}

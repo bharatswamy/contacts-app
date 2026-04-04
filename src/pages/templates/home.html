@@ -1,6 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Home | Contact Canvas{% endblock %}
+
 {% block content %}
-
-<h1>Hello world from home view</h1>
-<p>this is templates about home view template.</p>
-
+<section class="hero-panel">
+    <div>
+        <span class="eyebrow">Welcome</span>
+        <h1>Give your contacts a cleaner place to live.</h1>
+        <p>
+            This mini Django app now feels more like a crafted product than a starter template.
+            Use the directory to browse people, save details, and edit them in a calmer interface.
+        </p>
+        <div class="hero-actions">
+            <a class="button-link" href="{% url 'contacts:contact-list' %}">Open Directory</a>
+            <a class="button-ghost" href="{% url 'contacts:contact-create' %}">Create Contact</a>
+        </div>
+    </div>
+    <div class="hero-stats">
+        <div class="stat-tile">
+            <strong>Elegant</strong>
+            <span>Shared layout, softer cards, and more intentional spacing</span>
+        </div>
+        <div class="stat-tile">
+            <strong>Responsive</strong>
+            <span>Works cleanly on both desktop and smaller screens</span>
+        </div>
+    </div>
+</section>
 {% endblock %}

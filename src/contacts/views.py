@@ -57,7 +57,7 @@ class ContactUpdateView(UpdateView):
         return get_object_or_404(Contact, id=id_)
 
     def form_valid(self, form):
-        print(form.cleand_data)
+        print(form.cleaned_data)
         return super().form_valid(form)
 
 
