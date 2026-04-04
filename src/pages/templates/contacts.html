@@ -1,7 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Contact Page | Contact Canvas{% endblock %}
+
 {% block content %}
-
-<h1>CONTACTS</h1>
-<p>this is contact's view</p>
-
-
+<section class="section-card">
+    <span class="eyebrow">Overview</span>
+    <h2>The main experience lives in the directory.</h2>
+    <p class="section-copy">
+        This route now works as a small explainer page. For the full contact management experience,
+        jump into the directory and use the redesigned list, detail, and form screens.
+    </p>
+    <div class="button-row">
+        <a class="button-link" href="{% url 'contacts:contact-list' %}">Go to Directory</a>
+        <a class="button-ghost" href="{% url 'contacts:contact-create' %}">Add Contact</a>
+    </div>
+</section>
 {% endblock %}

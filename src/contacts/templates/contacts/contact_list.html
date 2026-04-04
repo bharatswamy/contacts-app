@@ -1,27 +1,91 @@
+{% extends "base.html" %}
+
+{% block title %}Directory | Contact Canvas{% endblock %}
+
 {% block content %}
-<h1>contacts list </h1>
+<section class="hero-panel">
+    <div>
+        <span class="eyebrow">Private Directory</span>
+        <h1>Contacts that feel curated, not cramped.</h1>
+        <p>
+            Keep names, numbers, and quick notes in a calmer interface. Search fast,
+            open details instantly, and add new people without the old plain CRUD look.
+        </p>
+        <div class="hero-actions">
+            <a class="button-link" href="{% url 'contacts:contact-create' %}">Add Contact</a>
+            {% if request.GET.search %}
+            <a class="button-ghost" href="{% url 'contacts:contact-list' %}">Clear Search</a>
+            {% endif %}
+        </div>
+    </div>
+    <div class="hero-stats">
+        <div class="stat-tile">
+            <strong>{{ object_list|length }}</strong>
+            <span>{% if request.GET.search %}Matches found{% else %}Saved contacts{% endif %}</span>
+        </div>
+        <div class="stat-tile">
+            <strong>{% if request.GET.search %}{{ request.GET.search }}{% else %}Ready{% endif %}</strong>
+            <span>{% if request.GET.search %}Current search term{% else %}Start with a new entry or refine the list{% endif %}</span>
+        </div>
+    </div>
+</section>
 
-<input type="text" id="search_input" placeholder="Type to search">
-<button type="submit" onclick="search_contact()">Search</button>
+<form class="section-card search-panel" method="get" action="{% url 'contacts:contact-list' %}">
+    <input
+        class="app-input"
+        type="text"
+        name="search"
+        value="{{ request.GET.search }}"
+        placeholder="Search by first letters of the name"
+    >
+    <button class="button" type="submit">Search</button>
+</form>
 
-<!-- ye contacts context se aaya hai jis par for loop chla hai -->
-{% for instance in object_list %}
-<!-- class base me context nhi lete to ye object_list lete hai. -->
-
-<p> {{forloop.counter}} - <a href="{{ instance.get_absolute_url }}"> {{ instance.name }} </a></p>
-
-{% endfor %}
-
-<button><a href="{% url 'contacts:contact-create' %}">Create Contact</a></button>
-<!-- <button><a href="{% url 'contacts:contact-list' %}">Back to list</a></button> -->
-
-<script type="text/javascript">
-    function search_contact() {
-        var start_url = "{% url 'contacts:contact-list' %}"
-        var search_input = document.getElementById('search_input').value;
-        var final_url = start_url + "?search=" + search_input;
-        window.location = final_url;
-    } 
-</script>
-
+{% if object_list %}
+<section class="contacts-grid">
+    {% for instance in object_list %}
+    <article class="contact-card">
+        <div class="contact-head">
+            <div class="avatar">{{ instance.name|slice:":1"|upper }}</div>
+            <div>
+                <div class="contact-meta">Contact {{ forloop.counter }}</div>
+                <h3>{{ instance.name }}</h3>
+            </div>
+        </div>
+        <div class="meta-row">
+            <span class="meta-pill">{{ instance.number }}</span>
+        </div>
+        <p>
+            {% if instance.message %}
+            {{ instance.message|truncatechars:110 }}
+            {% else %}
+            No notes yet. Open this card and add a short personal context.
+            {% endif %}
+        </p>
+        <div class="button-row">
+            <a class="button-link" href="{{ instance.get_absolute_url }}">View Profile</a>
+            <a class="button-ghost" href="{% url 'contacts:contact-update' instance.id %}">Edit</a>
+        </div>
+    </article>
+    {% endfor %}
+</section>
+{% else %}
+<section class="empty-card">
+    <span class="eyebrow">Nothing Here Yet</span>
+    <h2>{% if request.GET.search %}No contact matched "{{ request.GET.search }}"{% else %}Your directory is still empty{% endif %}</h2>
+    <p>
+        {% if request.GET.search %}
+        Try a shorter prefix or clear the search to browse everything again.
+        {% else %}
+        Add the first contact and this page will turn into a quick visual address book.
+        {% endif %}
+    </p>
+    <div class="button-row">
+        <a class="button-link" href="{% url 'contacts:contact-create' %}">Create Contact</a>
+        {% if request.GET.search %}
+        <a class="button-ghost" href="{% url 'contacts:contact-list' %}">Back to All Contacts</a>
+        {% endif %}
+    </div>
+</section>
+{% endif %}
 {% endblock %}

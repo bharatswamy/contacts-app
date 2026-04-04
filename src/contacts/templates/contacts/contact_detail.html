@@ -1,17 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}{{ object.name }} | Contact Canvas{% endblock %}
+
 {% block content %}
+<section class="detail-layout">
+    <article class="detail-card">
+        <div class="detail-hero">
+            <div class="avatar">{{ object.name|slice:":1"|upper }}</div>
+            <div>
+                <span class="eyebrow">Contact Profile</span>
+                <h2>{{ object.name }}</h2>
+                <div class="contact-meta">Saved in your private directory</div>
+            </div>
+        </div>
 
-<h1>{{ object.name }}</h1>
-<p>{% if object.message != None %} {{ object.message }}{% else %} oh here we again. {% endif %} </p>
-<p>{{ object.number }}</p>
+        <div class="info-grid">
+            <article>
+                <h3>Phone</h3>
+                <p class="section-copy">{{ object.number }}</p>
+            </article>
+            <article>
+                <h3>Quick Note</h3>
+                <p class="section-copy">
+                    {% if object.message %}
+                    {{ object.message }}
+                    {% else %}
+                    No message saved for this contact yet.
+                    {% endif %}
+                </p>
+            </article>
+        </div>
 
-<button><a href="{% url 'contacts:contact-update' object.id %}">Edit</a></button><br><br>
-<button><a href="{% url 'contacts:contact-delete' object.id %}">Delete</a></button><br><br>
-<button><a href="{% url 'contacts:contact-list' %}">Home</a></button>
+        <div class="detail-note">
+            Use this page as a lightweight profile card. Keep the note section for reminders,
+            relationship context, or anything that helps this contact feel recognizable at a glance.
+        </div>
+    </article>
 
-<!-- <input type="submit" value="Edit">
-<input type="button" value="Delete">
-<button>delete</button> -->
-<!-- <input type="submit" value="detail" name="detail" id="obj.id">  -->
-
-
+    <aside class="detail-side">
+        <div class="section-card">
+            <span class="eyebrow">Actions</span>
+            <div class="button-row">
+                <a class="button-link" href="{% url 'contacts:contact-update' object.id %}">Edit Contact</a>
+                <a class="button-danger" href="{% url 'contacts:contact-delete' object.id %}">Delete Contact</a>
+                <a class="button-ghost" href="{% url 'contacts:contact-list' %}">Back to Directory</a>
+            </div>
+        </div>
+        <div class="section-card">
+            <h2>Design Notes</h2>
+            <p class="section-copy">
+                This layout surfaces the essentials first, then keeps actions nearby without
+                overwhelming the content.
+            </p>
+        </div>
+    </aside>
+</section>
 {% endblock %}

@@ -1,17 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}
+{% if object %}Edit {{ object.name }}{% else %}Create Contact{% endif %} | Contact Canvas
+{% endblock %}
+
 {% block content %}
+<section class="split-layout">
+    <article class="split-card">
+        <span class="eyebrow">{% if object %}Refresh Entry{% else %}New Entry{% endif %}</span>
+        <h1>{% if object %}Shape the details for {{ object.name }}.{% else %}Add someone worth remembering.{% endif %}</h1>
+        <p>
+            A clean form, a little breathing room, and enough context to make your address book
+            feel deliberate instead of mechanical.
+        </p>
+        <div class="feature-grid">
+            <article>
+                <h3>Readable</h3>
+                <p class="muted">The form uses clearer spacing and field hierarchy.</p>
+            </article>
+            <article>
+                <h3>Fast</h3>
+                <p class="muted">Update essentials quickly without leaving the flow.</p>
+            </article>
+            <article>
+                <h3>Useful</h3>
+                <p class="muted">Save notes that make each contact easier to recall later.</p>
+            </article>
+        </div>
+    </article>
 
-<form action="{% url 'contacts:contact-create' %}" method="post">
-    {% csrf_token %}
-    {{ form.as_p }} <br>
-    <input type="submit" value="save">
+    <article class="form-card">
+        <h2>{% if object %}Edit Contact{% else %}Create Contact{% endif %}</h2>
+        <p class="section-copy">
+            Names should begin with a capital letter. Keep notes short and meaningful.
+        </p>
 
-    <!-- <button>save</button> -->
-</form>
+        <form class="form-shell" method="post">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+            <div class="field field-error">
+                {{ form.non_field_errors }}
+            </div>
+            {% endif %}
 
-<button><a href="{% url 'contacts:contact-list' %}">Back to list</a></button>
+            <div class="form-grid">
+                {% for field in form %}
+                <div class="field{% if field.errors %} field-error{% endif %}">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                    <p class="help-text">{{ field.help_text }}</p>
+                    {% endif %}
+                    {% for error in field.errors %}
+                    <p class="field-message">{{ error }}</p>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            </div>
 
-<!-- {% endblock %}
-
-{{ obj.id }} -->
-
-<!-- {{ obj.id }} -->
+            <div class="button-row">
+                <button class="button" type="submit">{% if object %}Save Changes{% else %}Save Contact{% endif %}</button>
+                <a class="button-ghost" href="{% url 'contacts:contact-list' %}">Back to Directory</a>
+            </div>
+        </form>
+    </article>
+</section>
+{% endblock %}

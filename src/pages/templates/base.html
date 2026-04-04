@@ -1,0 +1,35 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Contact Canvas{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'contacts/theme.css' %}">
+</head>
+<body class="{% block body_class %}{% endblock %}">
+    <div class="site-shell">
+        <div class="backdrop backdrop-one"></div>
+        <div class="backdrop backdrop-two"></div>
+        <header class="topbar">
+            <a class="brand" href="{% url 'contacts:contact-list' %}">
+                <span class="brand-mark">CC</span>
+                <span>
+                    <strong>Contact Canvas</strong>
+                    <small>Personal directory, reimagined</small>
+                </span>
+            </a>
+            <nav class="nav-links">
+                <a href="{% url 'contacts:contact-list' %}"{% if request.path == '/' %} class="is-active"{% endif %}>Directory</a>
+                <a href="{% url 'contacts:contact-create' %}"{% if '/create/' in request.path %} class="is-active"{% endif %}>New Contact</a>
+                <a href="{% url 'home' %}"{% if request.path == '/home/' %} class="is-active"{% endif %}>Home</a>
+                <a href="{% url 'about-view' %}"{% if request.path == '/about/' %} class="is-active"{% endif %}>About</a>
+            </nav>
+        </header>
+
+        <main class="page-frame">
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</body>
+</html>
