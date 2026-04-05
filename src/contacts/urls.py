@@ -17,6 +17,9 @@ from django.contrib import admin
 from django.urls import path
 
 from .views import (
+    contact_app_view,
+    contact_api_collection,
+    contact_api_detail,
     ContactCreateView,
     ContactDetailView,
     ContactDeleteView,
@@ -36,11 +39,14 @@ from .views import (
 app_name = "contacts"
 
 urlpatterns = [
-    path("", ContactListView.as_view(), name="contact-list"),
-    path("<int:id>/", ContactDetailView.as_view(), name="contact-detail"),
+    path("", contact_app_view, name="contact-list"),
+    path("server/", ContactListView.as_view(), name="contact-server-list"),
+    path("api/contacts/", contact_api_collection, name="api-contact-list"),
+    path("api/contacts/<int:id>/", contact_api_detail, name="api-contact-detail"),
     path("create/", ContactCreateView.as_view(), name="contact-create"),
     path("<int:id>/update/", ContactUpdateView.as_view(), name="contact-update"),
     path("<int:id>/delete/", ContactDeleteView.as_view(), name="contact-delete"),
+    path("<int:id>/", ContactDetailView.as_view(), name="contact-detail"),
 ]
 
 # urlpatterns = [

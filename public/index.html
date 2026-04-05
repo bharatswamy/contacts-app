@@ -6,7 +6,7 @@
   <title>Contact Canvas</title>
   <meta
     name="description"
-    content="A polished contact book that runs entirely in the browser and deploys cleanly to Cloudflare."
+    content="A polished contact book frontend for Cloudflare that connects to a Django API backend."
   >
   <link rel="stylesheet" href="./styles.css">
 </head>
@@ -20,20 +20,20 @@
         <span class="brand-mark">CC</span>
         <span>
           <strong>Contact Canvas</strong>
-          <small>Cloudflare-ready personal directory</small>
+          <small>Cloudflare frontend for your Django contacts API</small>
         </span>
       </a>
-      <div class="topbar-badge">Static app • Browser storage</div>
+      <div class="topbar-badge">Cloudflare frontend • Django backend</div>
     </header>
 
     <main class="page-frame">
       <section class="hero-panel">
         <div>
           <span class="eyebrow">Cloudflare Edition</span>
-          <h1>Your contact book, now deployable as a static app.</h1>
+          <h1>Your contact book, now connected to a real backend.</h1>
           <p>
-            This version runs fully in the browser, saves contacts in local storage,
-            and keeps the same warm visual style without needing a Django server.
+            This frontend deploys to Cloudflare, but every contact is fetched from and saved to
+            your Django API. Refreshing the page keeps the same data because it lives in the database.
           </p>
           <div class="hero-actions">
             <a class="button-link" href="#contact-form">Add Contact</a>
@@ -43,15 +43,15 @@
         <div class="hero-stats">
           <div class="stat-tile">
             <strong id="total-count">0</strong>
-            <span>Saved contacts</span>
+            <span>Saved in Django</span>
           </div>
           <div class="stat-tile">
             <strong id="search-count">0</strong>
             <span>Visible after search</span>
           </div>
           <div class="stat-tile">
-            <strong>Local</strong>
-            <span>Stored on this device only</span>
+            <strong>API</strong>
+            <span id="api-status">Waiting for backend connection</span>
           </div>
         </div>
       </section>
@@ -78,6 +78,7 @@
 
           <div class="toolbar">
             <button class="button-ghost" id="clear-search" type="button">Clear Search</button>
+            <button class="button-ghost" id="refresh-list" type="button">Refresh</button>
             <button class="button-ghost" id="clear-all" type="button">Delete All</button>
           </div>
 
@@ -139,7 +140,8 @@
           <section class="section-card">
             <span class="eyebrow">Deployment Note</span>
             <p class="section-copy">
-              This Cloudflare version is static. Contacts are saved in your browser and are not shared across devices.
+              Set your backend at <code>api.yourdomain.com</code>. This frontend can auto-detect that subdomain,
+              or you can override it in <code>public/config.js</code>.
             </p>
           </section>
         </aside>
@@ -168,7 +170,7 @@
     </article>
   </template>
 
+  <script src="./config.js"></script>
   <script src="./app.js"></script>
 </body>
 </html>
-

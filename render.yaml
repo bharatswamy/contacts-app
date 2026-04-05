@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: contacts-app-api
+    env: python
+    plan: free
+    buildCommand: bash build.sh
+    startCommand: cd src && gunicorn mysite.wsgi:application
+    envVars:
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        sync: false
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true

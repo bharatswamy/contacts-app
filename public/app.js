@@ -1,20 +1,15 @@
-const STORAGE_KEY = "contact-canvas-static-v1";
-
 const demoContacts = [
   {
-    id: crypto.randomUUID(),
     name: "Aarav Mehta",
     number: "9876543210",
     message: "Product designer. Prefers evening calls and short, clear updates."
   },
   {
-    id: crypto.randomUUID(),
     name: "Diya Kapoor",
     number: "9123456780",
     message: "College friend. Good person to ping for travel plans and weekend catchups."
   },
   {
-    id: crypto.randomUUID(),
     name: "Kabir Sharma",
     number: "9988776655",
     message: "Frontend engineer. Usually available on weekdays after 6 PM."
@@ -22,7 +17,7 @@ const demoContacts = [
 ];
 
 const state = {
-  contacts: loadContacts(),
+  contacts: [],
   search: "",
   editingId: null,
   previewId: null
@@ -33,9 +28,11 @@ const elements = {
   emptyState: document.querySelector("#empty-state"),
   totalCount: document.querySelector("#total-count"),
   searchCount: document.querySelector("#search-count"),
+  apiStatus: document.querySelector("#api-status"),
   searchForm: document.querySelector("#search-form"),
   searchInput: document.querySelector("#search-input"),
   clearSearch: document.querySelector("#clear-search"),
+  refreshList: document.querySelector("#refresh-list"),
   clearAll: document.querySelector("#clear-all"),
   seedDemo: document.querySelector("#seed-demo"),
   editorForm: document.querySelector("#editor-form"),
@@ -54,54 +51,59 @@ const elements = {
   cardTemplate: document.querySelector("#contact-card-template")
 };
 
+const apiBase = getApiBase();
+
 elements.searchForm.addEventListener("submit", onSearch);
 elements.clearSearch.addEventListener("click", clearSearch);
+elements.refreshList.addEventListener("click", () => {
+  fetchContacts({ message: "List refreshed." });
+});
 elements.clearAll.addEventListener("click", clearAllContacts);
 elements.seedDemo.addEventListener("click", seedDemoContacts);
 elements.editorForm.addEventListener("submit", onSaveContact);
 elements.cancelEdit.addEventListener("click", resetForm);
 
-render();
+if (!apiBase) {
+  elements.apiStatus.textContent = "Set public/config.js or use a custom domain with api.*";
+  setFormMessage("API base is not configured. Set public/config.js or use api.yourdomain.com.", "error");
+} else {
+  elements.apiStatus.textContent = apiBase;
+  fetchContacts();
+}
 
-function loadContacts() {
+async function fetchContacts(options = {}) {
+  setFormMessage(options.loadingMessage || "Loading contacts...");
+
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    const parsed = raw ? JSON.parse(raw) : [];
-    return Array.isArray(parsed) ? parsed : [];
+    const query = state.search.trim()
+      ? `?search=${encodeURIComponent(state.search.trim())}`
+      : "";
+    const response = await fetch(`${apiBase}${query}`, {
+      headers: { Accept: "application/json" }
+    });
+
+    if (!response.ok) {
+      throw new Error(`Request failed with ${response.status}`);
+    }
+
+    const data = await response.json();
+    state.contacts = data.contacts || [];
+    syncSelection();
+    render();
+    setFormMessage(options.message || "Contacts synced with Django.");
   } catch (error) {
-    console.error("Failed to read contacts from localStorage", error);
-    return [];
+    console.error(error);
+    setFormMessage("Could not load contacts from the Django API.", "error");
   }
-}
-
-function saveContacts() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state.contacts));
-}
-
-function getFilteredContacts() {
-  const query = state.search.trim().toLowerCase();
-  if (!query) {
-    return state.contacts;
-  }
-
-  return state.contacts.filter((contact) => {
-    return (
-      contact.name.toLowerCase().includes(query) ||
-      contact.number.toLowerCase().includes(query) ||
-      (contact.message || "").toLowerCase().includes(query)
-    );
-  });
 }
 
 function render() {
-  const filteredContacts = getFilteredContacts();
-
   elements.totalCount.textContent = String(state.contacts.length);
-  elements.searchCount.textContent = String(filteredContacts.length);
+  elements.searchCount.textContent = String(state.contacts.length);
   elements.contactsGrid.innerHTML = "";
-  elements.emptyState.classList.toggle("is-hidden", filteredContacts.length > 0);
+  elements.emptyState.classList.toggle("is-hidden", state.contacts.length > 0);
 
-  filteredContacts.forEach((contact, index) => {
+  state.contacts.forEach((contact, index) => {
     const fragment = elements.cardTemplate.content.cloneNode(true);
     const card = fragment.querySelector(".contact-card");
     const avatar = fragment.querySelector(".contact-avatar");
@@ -121,13 +123,13 @@ function render() {
 
     previewButton.addEventListener("click", () => {
       state.previewId = contact.id;
-      renderPreview();
+      render();
     });
 
     editButton.addEventListener("click", () => {
       populateForm(contact);
       state.previewId = contact.id;
-      renderPreview();
+      render();
       window.scrollTo({ top: 0, behavior: "smooth" });
     });
 
@@ -142,16 +144,6 @@ function render() {
     elements.contactsGrid.appendChild(fragment);
   });
 
-  if (!state.previewId && filteredContacts.length > 0) {
-    state.previewId = filteredContacts[0].id;
-  }
-
-  if (filteredContacts.length === 0) {
-    state.previewId = null;
-  } else if (!filteredContacts.some((contact) => contact.id === state.previewId)) {
-    state.previewId = filteredContacts[0].id;
-  }
-
   renderPreview();
 }
 
@@ -163,7 +155,7 @@ function renderPreview() {
     elements.previewName.textContent = "Contact Canvas";
     elements.previewNumber.textContent = "Select a contact to inspect it here.";
     elements.previewMessage.textContent =
-      "Contact notes will appear here. This panel helps the static app still feel like a profile view.";
+      "Contact notes will appear here. This Cloudflare frontend expects a Django API backend.";
     return;
   }
 
@@ -174,55 +166,65 @@ function renderPreview() {
     contact.message || "No notes saved yet for this contact.";
 }
 
-function onSearch(event) {
+async function onSearch(event) {
   event.preventDefault();
   state.search = elements.searchInput.value;
-  render();
+  await fetchContacts({ message: "Search updated." });
 }
 
-function clearSearch() {
+async function clearSearch() {
   state.search = "";
   elements.searchInput.value = "";
-  render();
+  await fetchContacts({ message: "Search cleared." });
 }
 
-function onSaveContact(event) {
+async function onSaveContact(event) {
   event.preventDefault();
 
   const payload = {
-    id: state.editingId || crypto.randomUUID(),
     name: elements.name.value.trim(),
     number: elements.number.value.trim(),
     message: elements.message.value.trim()
   };
 
   if (!payload.name || !payload.number) {
-    setFormMessage("Name and phone number are required.");
+    setFormMessage("Name and phone number are required.", "error");
     return;
   }
 
-  if (!/^[A-Za-z]/.test(payload.name)) {
-    setFormMessage("Name should start with a letter.");
+  if (state.editingId) {
+    await saveContact(`${apiBase}${state.editingId}/`, "PUT", payload, "Contact updated.");
     return;
   }
 
-  if (payload.name[0] !== payload.name[0].toUpperCase()) {
-    setFormMessage("Name should start with a capital letter.");
-    return;
-  }
+  await saveContact(apiBase, "POST", payload, "Contact created.");
+}
 
-  const existingIndex = state.contacts.findIndex((contact) => contact.id === payload.id);
-  if (existingIndex >= 0) {
-    state.contacts[existingIndex] = payload;
-  } else {
-    state.contacts.unshift(payload);
-  }
+async function saveContact(url, method, payload, successMessage) {
+  setFormMessage("Saving to Django...");
 
-  saveContacts();
-  state.previewId = payload.id;
-  resetForm();
-  render();
-  setFormMessage("Contact saved successfully.");
+  try {
+    const response = await fetch(url, {
+      method,
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      setFormMessage(formatErrors(data.errors), "error");
+      return;
+    }
+
+    state.previewId = data.contact.id;
+    resetForm();
+    await fetchContacts({ message: successMessage });
+  } catch (error) {
+    console.error(error);
+    setFormMessage("Save request failed.", "error");
+  }
 }
 
 function populateForm(contact) {
@@ -244,7 +246,7 @@ function resetForm() {
   elements.submitButton.textContent = "Save Contact";
 }
 
-function deleteContact(contactId) {
+async function deleteContact(contactId) {
   const contact = state.contacts.find((item) => item.id === contactId);
   if (!contact) {
     return;
@@ -255,49 +257,100 @@ function deleteContact(contactId) {
     return;
   }
 
-  state.contacts = state.contacts.filter((item) => item.id !== contactId);
-  if (state.editingId === contactId) {
-    resetForm();
+  try {
+    const response = await fetch(`${apiBase}${contactId}/`, {
+      method: "DELETE"
+    });
+
+    if (!response.ok) {
+      setFormMessage("Delete request failed.", "error");
+      return;
+    }
+
+    if (state.editingId === contactId) {
+      resetForm();
+    }
+    if (state.previewId === contactId) {
+      state.previewId = null;
+    }
+    await fetchContacts({ message: "Contact deleted." });
+  } catch (error) {
+    console.error(error);
+    setFormMessage("Delete request failed.", "error");
   }
-  if (state.previewId === contactId) {
-    state.previewId = null;
-  }
-  saveContacts();
-  render();
-  setFormMessage("Contact deleted.");
 }
 
-function clearAllContacts() {
+async function clearAllContacts() {
   if (state.contacts.length === 0) {
     setFormMessage("There are no contacts to delete.");
     return;
   }
 
-  const confirmed = window.confirm("Delete all saved contacts from this browser?");
+  const confirmed = window.confirm("Delete all saved contacts from the Django database?");
   if (!confirmed) {
     return;
   }
 
-  state.contacts = [];
-  state.previewId = null;
-  resetForm();
-  saveContacts();
-  render();
-  setFormMessage("All contacts removed from this browser.");
+  for (const contact of [...state.contacts]) {
+    await deleteContact(contact.id);
+  }
 }
 
-function seedDemoContacts() {
-  state.contacts = demoContacts.map((contact) => ({ ...contact, id: crypto.randomUUID() }));
-  state.previewId = state.contacts[0]?.id ?? null;
-  saveContacts();
-  render();
-  setFormMessage("Demo contacts loaded.");
+async function seedDemoContacts() {
+  for (const contact of demoContacts) {
+    await saveContact(apiBase, "POST", contact, `Added ${contact.name}.`);
+  }
+  await fetchContacts({ message: "Demo contacts loaded into Django." });
 }
 
-function setFormMessage(message) {
+function syncSelection() {
+  if (!state.previewId && state.contacts.length > 0) {
+    state.previewId = state.contacts[0].id;
+    return;
+  }
+
+  if (!state.contacts.some((contact) => contact.id === state.previewId)) {
+    state.previewId = state.contacts[0]?.id || null;
+  }
+}
+
+function setFormMessage(message, tone = "") {
   elements.formMessage.textContent = message;
+  elements.formMessage.dataset.tone = tone;
+}
+
+function formatErrors(errors) {
+  if (!errors) {
+    return "Something went wrong.";
+  }
+
+  return Object.values(errors)
+    .flat()
+    .join(" ");
 }
 
 function getInitial(name) {
   return (name || "C").trim().charAt(0).toUpperCase();
+}
+
+function getApiBase() {
+  if (window.CONTACTS_API_BASE) {
+    return ensureTrailingSlash(window.CONTACTS_API_BASE);
+  }
+
+  const { hostname } = window.location;
+  if (hostname === "127.0.0.1" || hostname === "localhost") {
+    return "http://127.0.0.1:8001/api/contacts/";
+  }
+
+  if (hostname.endsWith(".pages.dev")) {
+    return "";
+  }
+
+  const cleanHost = hostname.startsWith("www.") ? hostname.slice(4) : hostname;
+  return `https://api.${cleanHost}/api/contacts/`;
+}
+
+function ensureTrailingSlash(value) {
+  return value.endsWith("/") ? value : `${value}/`;
 }
